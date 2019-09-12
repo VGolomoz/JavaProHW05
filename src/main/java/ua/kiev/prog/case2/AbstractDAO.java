@@ -69,36 +69,6 @@ public abstract class AbstractDAO<K, T> {
         }
     }
 
-    public void update(T t) {
-        try {
-            Field[] fields = t.getClass().getDeclaredFields();
-            Field id = null;
-
-            for (Field f : fields) {
-                if (f.isAnnotationPresent(Id.class)) {
-                    id = f;
-                    id.setAccessible(true);
-                    break;
-                }
-            }
-            if (id == null)
-                throw new RuntimeException("No Id field");
-
-            try (Statement st = conn.createStatement()) {
-            for (Field f:fields) {
-                if(!f.equals(id)) {
-                    f.setAccessible(true);
-                    String sql = "UPDATE " + table + " SET " + f.getName() + " = \"" + f.get(t) + "\" WHERE \"" + id.get(t) + "\"";
-                    st.execute(sql);
-                    }
-                }
-            }
-
-        } catch (Exception ex) {
-            throw new RuntimeException(ex);
-        }
-    }
-
     public List<T> getAll(Class<T> cls) {
         List<T> res = new ArrayList<>();
 
@@ -129,4 +99,71 @@ public abstract class AbstractDAO<K, T> {
             throw new RuntimeException(ex);
         }
     }
+
+//    <- HOMEWORK BLOCK
+
+    public void update(T t) {
+        try {
+            Field[] fields = t.getClass().getDeclaredFields();
+            Field id = null;
+
+            for (Field f : fields) {
+                if (f.isAnnotationPresent(Id.class)) {
+                    id = f;
+                    id.setAccessible(true);
+                    break;
+                }
+            }
+            if (id == null)
+                throw new RuntimeException("No Id field");
+
+            try (Statement st = conn.createStatement()) {
+                StringBuilder sb = new StringBuilder();
+                for (Field f : fields) {
+                    if (!f.equals(id)) {
+                        f.setAccessible(true);
+                        sb.append(f.getName() + " = \"" + f.get(t) + "\",");
+                    }
+                }
+                String result = sb.substring(0, sb.length() - 1);
+                String query = "UPDATE " + table + " SET " + result + " WHERE \"" + id.get(t) + "\"";
+                st.execute(query);
+            }
+
+        } catch (Exception ex) {
+            throw new RuntimeException(ex);
+        }
+    }
+
+
+    public List<List> getAll(String table, String... fields) {
+        List<List> res = new ArrayList<>();
+
+        try {
+            try (Statement st = conn.createStatement()) {
+                try (ResultSet rs = st.executeQuery("SELECT * FROM " + table)) {
+                    ResultSetMetaData md = rs.getMetaData();
+
+                    while (rs.next()) {
+                        ArrayList<Object> fieldsData = new ArrayList<>();
+                        for (int i = 1; i <= md.getColumnCount(); i++) {
+
+                            for (String s : fields) {
+                                if (md.getColumnName(i).equals(s)) {
+                                    fieldsData.add(rs.getObject(i));
+                                    break;
+                                }
+                            }
+                        }
+                        res.add(fieldsData);
+                    }
+                }
+            }
+            return res;
+        } catch (Exception ex) {
+            throw new RuntimeException(ex);
+        }
+    }
+
+//    <- HOMEWORK BLOCK
 }

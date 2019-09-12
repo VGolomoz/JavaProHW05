@@ -5,6 +5,7 @@ import ua.kiev.prog.shared.ConnectionFactory;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
 
@@ -31,14 +32,24 @@ public class Main {
             for (Client cli : list)
                 System.out.println(cli);
 
+//            <- HOMEWORK BLOCK
+
             Client cl1 = list.get(0);
             cl1.setAge(34);
             dao.update(cl1);
 
-           dao.delete(list.get(0));
+            List<List> clientList = dao.getAll("clients","name", "age");
+            for (List lst : clientList)
+                System.out.println(lst);
+
+//           <- HOMEWORK BLOCK
+
+
+            dao.delete(list.get(0));
         } finally {
             sc.close();
             if (conn != null) conn.close();
         }
     }
 }
+
