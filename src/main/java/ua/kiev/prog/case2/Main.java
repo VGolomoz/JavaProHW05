@@ -12,7 +12,7 @@ import java.util.Scanner;
 public class Main {
     static final String DB_CONNECTION = "jdbc:mysql://localhost:3306/mydb?serverTimezone=UTC";
     static final String DB_USER = "root";
-    static final String DB_PASSWORD = "asDF1506";
+    static final String DB_PASSWORD = "password";
 
     public static void main(String[] args) throws SQLException {
         Scanner sc = new Scanner(System.in);
